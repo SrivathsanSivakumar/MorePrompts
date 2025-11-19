@@ -21,7 +21,7 @@ TOKEN_COUNTER_JS = os.path.join(
 
 _node_path = shutil.which("node")
 
-def _count_via_node(text: str) -> int:
+def count_via_node(text: str) -> int:
     """Calculate tokens for user input using anthropic tokenizer
 
         Args:
@@ -43,7 +43,7 @@ def _count_via_node(text: str) -> int:
         return int((out.decode().strip() or "0"))
     
     except Exception as e:
-        return e
+        return -1
 
 ### TODO: Have backup token counting mechanism and add support for future tokenizers here
 def count_tokens(text: str) -> int:
@@ -55,7 +55,7 @@ def count_tokens(text: str) -> int:
         Returns:
             int: token count for user input
     """
-    t = _count_via_node(text)
+    t = count_via_node(text)
     if t is not None: 
         return t
     return -1

@@ -1,7 +1,5 @@
 ### Manages the terminal and fetches user input to pass to backend
 
-### Consider starting a new thread to write the overlay separately
-
 import os, sys, fcntl, termios, struct
 sys.path.insert(1, os.path.join(sys.path[0], ''))
 from terminal.buffer_handler import BufferHandler
@@ -79,9 +77,9 @@ class TerminalHandler:
             # cursor manipulation and adding text
             overlay_bytes = (
                 # b'\x1b[0J' +
-                '\x1b[s'            # save cursor position
-                f'\x1b[{rows};1H' +   # move to last row
-                '\x1b[K' +         # clear the entire line
+                '\x1b[s' +          # save cursor position
+                f'\x1b[{rows};1H' + # move to last row
+                '\x1b[K' +          # clear the entire line
                 text +              # write the text onto the line
                 '\x1b[u'            # move cursor to saved position
             )
