@@ -19,7 +19,7 @@ def main():
     signal.signal(signal.SIGWINCH, th.on_resize)
 
     # launch claude and give it full control
-    p.interact(input_filter=bh.calculate_tokens)
+    p.interact(input_filter=bh.get_clean_buffer)
 
 if __name__ == "__main__":
     main()

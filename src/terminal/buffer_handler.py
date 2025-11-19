@@ -50,7 +50,7 @@ class BufferHandler:
 
         return self.buffer
     
-    def calculate_tokens(self, usr_input):
+    def get_clean_buffer(self, usr_input):
         """Get user input from claude code and calculate token and price
 
             Args:
