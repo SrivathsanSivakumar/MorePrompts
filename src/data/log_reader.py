@@ -161,7 +161,6 @@ class LogReader:
                             model = message.get("model")
                             usage = message.get("usage")
                             if isinstance(usage, dict):
-                                print()
                                 input_tokens = usage.get("input_tokens")
                                 output_tokens = usage.get("output_tokens")
 
