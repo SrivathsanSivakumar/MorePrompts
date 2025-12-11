@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 from dataclasses import dataclass
 
@@ -16,6 +16,9 @@ SONNET_OUTPUT_PRICE_GT_200K=22.50
 
 HAIKU_INPUT_PRICE=1.00
 HAIKU_OUTPUT_PRICE=5.00
+
+OPUS_INPUT_PRICE = 5.00 
+OPUS_OUTPUT_PRICE = 25.00
 
 def _input_cost_usd(model: str, tokens:int) -> tuple:
     """identifies tier for model and calculates input token pricing
@@ -41,6 +44,11 @@ def _input_cost_usd(model: str, tokens:int) -> tuple:
     elif "haiku-4-5" in model: 
         rate = HAIKU_INPUT_PRICE
         tier = "flat"
+
+    elif "opus-4-5" in model:
+        rate = OPUS_INPUT_PRICE
+        tier = "flat"
+
     else: 
         return ()
         
@@ -70,6 +78,11 @@ def _output_cost_usd(model:str, tokens:int) -> tuple:
     elif "haiku-4-5" in model: 
         rate = HAIKU_OUTPUT_PRICE
         tier = "flat"
+
+    elif "opus-4-5" in model:
+        rate = OPUS_OUTPUT_PRICE
+        tier = "flat"
+        
     else: 
         return ()
         
@@ -82,6 +95,7 @@ class UsageData:
     input_tokens_cost: int
     output_tokens: int
     output_tokens_cost: int
+    timestamp: datetime
 
 class LogReader:
     """Reads relevant jsonl files and creates a set of valid tokens to use for calculations"""
@@ -105,12 +119,16 @@ class LogReader:
         return list(data_path.rglob("*.jsonl"))
     
 
-    def parse_json_files(self) -> List[UsageData]:
+    def parse_json_files(self, hours_back: int = 5) -> List[UsageData]:
         """Parse relevant files only and return a collection of input and output tokens
-        
-        Returns:
-            List of objects of data class that contains input and output tokens
+    
+            Args:
+                hours_back: length of a single session in claude
+
+            Returns:
+                List of objects of data class that contains input and output tokens
         """
+        cutoff_time = datetime.now(timezone.utc) - timedelta(hours=hours_back)
         jsonl_files_path = self.get_jsonl_files()
         for json_file in jsonl_files_path:
             with open(json_file, encoding='utf-8') as f:
@@ -123,6 +141,15 @@ class LogReader:
                     else:
                         data = json.loads(line)
                         message = data.get("message")
+                        timestamp = data.get("timestamp")
+
+                        if not timestamp: 
+                            continue
+
+                        timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                        if timestamp < cutoff_time:
+                            continue
+
                         if isinstance(message, dict):
                             # uniquely identify each request within each message
                             message_id = message.get("id")
@@ -138,6 +165,7 @@ class LogReader:
                                 input_tokens = usage.get("input_tokens")
                                 output_tokens = usage.get("output_tokens")
 
+
                                 # calculate dollar cost
                                 input_tokens_cost = _input_cost_usd(model, input_tokens)
                                 output_tokens_cost = _output_cost_usd(model, output_tokens)
@@ -146,7 +174,8 @@ class LogReader:
                                     input_tokens=input_tokens,
                                     input_tokens_cost=input_tokens_cost,
                                     output_tokens=output_tokens,
-                                    output_tokens_cost=output_tokens_cost
+                                    output_tokens_cost=output_tokens_cost,
+                                    timestamp=timestamp
                                     )
                                 self.usage_data.append(user_usage)
                             self.processed_entries.add(unique_id)
