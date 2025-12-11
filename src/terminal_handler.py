@@ -1,4 +1,4 @@
-### Manages the terminal and displays token usage so far
+### Manages the terminal and displays usage data for current session
 
 import os, sys, fcntl, termios, struct
 
@@ -44,12 +44,19 @@ class TerminalHandler:
             Returns:
                 Formatted string that contains (Model | Input tokens, cost | Output tokens, cost)
         """
-        session_data = self.log_reader.parse_json_files()
-        total_calculator = TotalCalculator(session_data=session_data)
+        usage_data = self.log_reader.parse_json_files()
+        total_calculator = TotalCalculator(usage_data=usage_data)
         usage_data = total_calculator.calculate_totals()
         if usage_data:
-            return f"Input: Tokens - {usage_data[0]}, Cost - ${usage_data[1]:.6f} | Output: Tokens - {usage_data[2]}, Cost - ${usage_data[3]:.6f}"
-        return "Type to start..."
+            input_tokens, input_cost = usage_data[0][0], usage_data[0][1]
+            output_tokens, output_cost = usage_data[1][0], usage_data[1][1]
+            total_tokens, total_cost = usage_data[2][0], usage_data[2][1]
+            return (
+                f"In: {input_tokens} tokens, ${input_cost:.6f} | " +
+                f"Out: {output_tokens} tokens, ${output_cost:.6f} | " +
+                f"Total: {total_tokens} tokens, ${total_cost:.6f}"
+            )
+        return ""
         
     def draw_overlay(self):
         """Filter that adds overlay to the bottom of terminal
