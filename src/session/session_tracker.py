@@ -46,6 +46,11 @@ class Session:
         out_tokens, out_cost = self.total_output_usage
         return (inp_tokens + out_tokens, inp_cost + out_cost)
     
+    @property
+    def total_messages(self) -> int:
+        """Returns total messages sent in session"""
+        return len(self.entries)
+    
 class SessionTracker:
     def __init__(self):
         self.sessions: List[Session] = []

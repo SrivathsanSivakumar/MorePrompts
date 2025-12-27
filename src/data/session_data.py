@@ -49,3 +49,9 @@ class SessionData:
             return f"{minutes}m {seconds}s"
         else:
             return f"{seconds}s"
+
+    def session_messages(self) -> int:
+        """Returns how many messages have been sent in session"""
+        if self.current_session is None:
+            return 0
+        return self.current_session.total_messages
