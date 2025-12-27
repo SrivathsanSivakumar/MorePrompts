@@ -1,0 +1,51 @@
+### Calculate total usage metrics for session
+
+import datetime
+from typing import List
+from data.log_reader import UsageData
+from session.session_tracker import SessionTracker
+from datetime import datetime, timezone
+
+class SessionData:
+    """Calculates total usage data along with session relevant data like time left before reset"""
+    def __init__(self, usage_data: List[UsageData]):
+        self.session_tracker = SessionTracker()
+        self.session_tracker.build_sessions(usage_data)
+        self.current_session = self.session_tracker.get_current_session()
+
+    def calculate_totals(self) -> tuple:
+        """Read relevant metrics from UsageData and add the values to sum totals
+
+            Returns:
+                total of input tokens, input tokens cost, output tokens and output tokens cost
+        """
+        if not self.current_session: return ((0, 0.0), (0, 0.0), (0, 0.0))
+        # print(current_session.total_input_usage, current_session.total_output_usage, current_session.total_tokens)
+        return (self.current_session.total_input_usage, self.current_session.total_output_usage, self.current_session.total_tokens)
+    
+    def session_reset_time(self) -> str:
+        """Calculate how much time is left before session resets
+
+            Returns:
+                Time left in user readable form
+        """
+
+        if self.current_session is None:
+            return "No active session"
+
+        current_session_end = self.current_session.end_time
+        time_left = current_session_end - datetime.now(timezone.utc)
+        total_seconds = int(time_left.total_seconds())
+        # convert to human readable format
+        if total_seconds < 0:
+            return 'Session expired - waiting to start a new conversation'
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        seconds = total_seconds % 60
+
+        if hours > 0:
+          return f"{hours}h {minutes}m"
+        elif minutes > 0:
+            return f"{minutes}m {seconds}s"
+        else:
+            return f"{seconds}s"
