@@ -49,15 +49,15 @@ class TerminalHandler:
         session_data = SessionData(usage_data=usage_data)
         usage_data = session_data.calculate_totals()
         session_end = session_data.session_reset_time()
+        session_messages = session_data.session_messages()
         if usage_data:
             input_tokens, input_cost = usage_data[0][0], usage_data[0][1]
             output_tokens, output_cost = usage_data[1][0], usage_data[1][1]
             total_tokens, total_cost = usage_data[2][0], usage_data[2][1]
             return (
-                # f"In: {input_tokens} tokens, ${input_cost:.6f} | " +
-                # f"Out: {output_tokens} tokens, ${output_cost:.6f} | " +
                 f"Total: {total_tokens} tokens, ${total_cost:.6f} | " +
-                f"Session reset in: {session_end}"
+                f"Session reset in: {session_end} | " +
+                f"Messages: {session_messages}"
             )
         return ""
         
