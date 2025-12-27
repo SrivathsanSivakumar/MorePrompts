@@ -6,7 +6,7 @@ import time
 from data.log_reader import LogReader
 sys.path.insert(1, os.path.join(sys.path[0], ''))
 import threading
-from data.total_calculator import TotalCalculator
+from data.session_data import SessionData
 
 class TerminalHandler:
     """Handler for managing terminal and drawing overlays"""
@@ -46,16 +46,18 @@ class TerminalHandler:
                 Formatted string that contains (Model | Input tokens, cost | Output tokens, cost)
         """
         usage_data = self.log_reader.parse_json_files()
-        total_calculator = TotalCalculator(usage_data=usage_data)
-        usage_data = total_calculator.calculate_totals()
+        session_data = SessionData(usage_data=usage_data)
+        usage_data = session_data.calculate_totals()
+        session_end = session_data.session_reset_time()
         if usage_data:
             input_tokens, input_cost = usage_data[0][0], usage_data[0][1]
             output_tokens, output_cost = usage_data[1][0], usage_data[1][1]
             total_tokens, total_cost = usage_data[2][0], usage_data[2][1]
             return (
-                f"In: {input_tokens} tokens, ${input_cost:.6f} | " +
-                f"Out: {output_tokens} tokens, ${output_cost:.6f} | " +
-                f"Total: {total_tokens} tokens, ${total_cost:.6f}"
+                # f"In: {input_tokens} tokens, ${input_cost:.6f} | " +
+                # f"Out: {output_tokens} tokens, ${output_cost:.6f} | " +
+                f"Total: {total_tokens} tokens, ${total_cost:.6f} | " +
+                f"Session reset in: {session_end}"
             )
         return ""
         
