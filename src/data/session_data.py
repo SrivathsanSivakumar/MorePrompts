@@ -13,15 +13,14 @@ class SessionData:
         self.session_tracker.build_sessions(usage_data)
         self.current_session = self.session_tracker.get_current_session()
 
-    def calculate_totals(self) -> tuple:
+    def total_tokens(self) -> int:
         """Read relevant metrics from UsageData and add the values to sum totals
 
             Returns:
-                total of input tokens, input tokens cost, output tokens and output tokens cost
+                total of input tokens and output tokens
         """
-        if not self.current_session: return ((0, 0.0), (0, 0.0), (0, 0.0))
-        # print(current_session.total_input_usage, current_session.total_output_usage, current_session.total_tokens)
-        return (self.current_session.total_input_usage, self.current_session.total_output_usage, self.current_session.total_tokens)
+        if not self.current_session: return 0.0
+        return self.current_session.total_tokens
     
     def session_reset_time(self) -> str:
         """Calculate how much time is left before session resets
@@ -55,3 +54,9 @@ class SessionData:
         if self.current_session is None:
             return 0
         return self.current_session.total_messages
+    
+    def total_cost(self) -> float:
+        """Returns total dollar cost usage"""
+        if self.current_session is None:
+            return 0.0
+        return self.current_session.total_costs

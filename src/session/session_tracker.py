@@ -22,34 +22,40 @@ class Session:
         return datetime.now(timezone.utc) < self.end_time
     
     @property
-    def total_input_usage(self) -> tuple:
+    def total_input_usage(self) -> int:
         """Returns total input tokens in session"""
-        token_usage, dollar_cost = 0, 0
+        token_usage = 0
         for entry in self.entries:
             token_usage += entry.input_tokens
-            dollar_cost += entry.input_tokens_cost[0]
-        return token_usage, dollar_cost
+        return token_usage
     
     @property
-    def total_output_usage(self) -> tuple:
+    def total_output_usage(self) -> int:
         """Returns total output tokens in session"""
-        token_usage, dollar_cost = 0, 0
+        token_usage =  0
         for entry in self.entries:
             token_usage += entry.output_tokens
-            dollar_cost += entry.output_tokens_cost[0]
-        return token_usage, dollar_cost
+        return token_usage
     
     @property
     def total_tokens(self) -> int:
         """Returns total input + output tokens in session"""
-        inp_tokens, inp_cost = self.total_input_usage
-        out_tokens, out_cost = self.total_output_usage
-        return (inp_tokens + out_tokens, inp_cost + out_cost)
+        inp_tokens = self.total_input_usage
+        out_tokens = self.total_output_usage
+        return inp_tokens + out_tokens
     
     @property
     def total_messages(self) -> int:
         """Returns total messages sent in session"""
         return len(self.entries)
+    
+    @property
+    def total_costs(self) -> float:
+        """Returns total dollar cost usage in session"""
+        total_cost = 0.0
+        for entry in self.entries:
+            total_cost += entry.cost
+        return total_cost
     
 class SessionTracker:
     def __init__(self):

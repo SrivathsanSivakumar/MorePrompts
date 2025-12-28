@@ -6,7 +6,7 @@ import shutil, pexpect, os, sys, signal
 sys.path.insert(1, os.path.join(sys.path[0], ''))
 from data.log_reader import LogReader
 from data.session_data import SessionData
-from terminal_handler import TerminalHandler
+from terminal.terminal_handler import TerminalHandler
 
 def main():
     CLAUDE_BIN = shutil.which('claude')

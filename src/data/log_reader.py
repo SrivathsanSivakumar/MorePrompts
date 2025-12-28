@@ -4,97 +4,55 @@ import json
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
+from data.pricing import _get_pricing
 from dataclasses import dataclass
 
-# Ref: https://www.claude.com/pricing#api
-SONNET_INPUT_TIER_BREAK=200000
-SONNET_INPUT_PRICE_LE_200K=3.00
-SONNET_INPUT_PRICE_GT_200K=6.00
-
-SONNET_OUTPUT_PRICE_LE_200K=15.00
-SONNET_OUTPUT_PRICE_GT_200K=22.50
-
-HAIKU_INPUT_PRICE=1.00
-HAIKU_OUTPUT_PRICE=5.00
-
-OPUS_INPUT_PRICE = 5.00 
-OPUS_OUTPUT_PRICE = 25.00
-
-def _input_cost_usd(model: str, tokens:int) -> tuple:
-    """identifies tier for model and calculates input token pricing
+def _calculate_total_cost(model: str, input_tokens: int, output_tokens: int,
+                          cache_write_tokens: int, cache_read_tokens: int) -> float:
+    """Apply relevant pricing per token for relevant Claude model
 
         Args:
-            model: model used in session (Sonnet4.5 and Haiku4.5 are supported)
-            tokens: input token count
+            model: Model used for message
+            input_tokens: input token usage for message
+            output_tokens: output token usage for message
+            cache_write_tokens: cached write tokens for message
+            cache_read_tokens: cached read tokens for message
 
         Returns:
-            dollar cost and tier for input tokens
+            Sum total of dollar cost associated with each token type
     """
-    if "sonnet-4-5" in model:
-        if tokens <= SONNET_INPUT_TIER_BREAK:
-            tier = "<=200k"  
-        else:
-            tier = ">200k"
+    model_pricing = _get_pricing(model)
 
-        if tier == "<=200k":
-            rate = SONNET_INPUT_PRICE_LE_200K 
-        else:
-            rate = SONNET_INPUT_PRICE_GT_200K
+    # Determine tier based on total input tokens for sonnet
+    total_input_tokens = input_tokens + cache_write_tokens + cache_read_tokens
 
-    elif "haiku-4-5" in model: 
-        rate = HAIKU_INPUT_PRICE
-        tier = "flat"
+    input_rate = model_pricing.input_base
+    output_rate = model_pricing.output_base
+    cache_write_rate = model_pricing.cache_write
+    cache_read_rate = model_pricing.cache_read
 
-    elif "opus-4-5" in model:
-        rate = OPUS_INPUT_PRICE
-        tier = "flat"
+    # Override with tier rates if threshold exceeded
+    if model_pricing.tiered and model_pricing.tier_break and total_input_tokens > model_pricing.tier_break:
+        input_rate = model_pricing.input_tier
+        output_rate = model_pricing.output_tier
+        cache_write_rate = model_pricing.cache_write_tier
+        cache_read_rate = model_pricing.cache_read_tier
 
-    else:
-        return (0.0, "unknown")
+    input_cost = (input_tokens / 1_000_000) * input_rate
+    output_cost = (output_tokens / 1_000_000) * output_rate
+    cache_write_cost = (cache_write_tokens / 1_000_000) * cache_write_rate
+    cache_read_cost = (cache_read_tokens / 1_000_000) * cache_read_rate
 
-    return (tokens/1_000_000)*rate, tier
-
-def _output_cost_usd(model:str, tokens:int) -> tuple:
-    """Identifies tier for model and calculates output tokens pricing
-    
-        Args:
-            model: model used in session. (Sonnet4.5 and Haiku4.5 are supported)
-            tokens: output token count
-
-        Returns:
-            dollar cost and tier for output tokens
-    """
-    if "sonnet-4-5" in model:
-        if tokens <= SONNET_INPUT_TIER_BREAK:
-            tier = "<=200k"  
-        else:
-            tier = ">200k"
-
-        if tier == "<=200k":
-            rate = SONNET_OUTPUT_PRICE_LE_200K 
-        else:
-            rate = SONNET_OUTPUT_PRICE_GT_200K
-
-    elif "haiku-4-5" in model: 
-        rate = HAIKU_OUTPUT_PRICE
-        tier = "flat"
-
-    elif "opus-4-5" in model:
-        rate = OPUS_OUTPUT_PRICE
-        tier = "flat"
-
-    else:
-        return (0.0, "unknown")
-
-    return (tokens/1_000_000)*rate, tier
+    return input_cost + output_cost + cache_write_cost + cache_read_cost
 
 @dataclass
 class UsageData:
     model: str
     input_tokens: int
-    input_tokens_cost: int
     output_tokens: int
-    output_tokens_cost: int
+    cache_write_tokens: int
+    cache_read_tokens: int
+    cost: float
     timestamp: datetime
 
 class LogReader:
@@ -170,15 +128,24 @@ class LogReader:
                             if isinstance(usage, dict):
                                 input_tokens = usage.get("input_tokens")
                                 output_tokens = usage.get("output_tokens")
+                                cache_write_tokens = usage.get("cache_creation_input_tokens")
+                                cache_read_tokens = usage.get("cache_read_input_tokens")
 
-                                input_tokens_cost = _input_cost_usd(model, input_tokens)
-                                output_tokens_cost = _output_cost_usd(model, output_tokens)
+                                total_cost = _calculate_total_cost(
+                                    model=model,
+                                    input_tokens=input_tokens,
+                                    output_tokens=output_tokens,
+                                    cache_write_tokens=cache_write_tokens,
+                                    cache_read_tokens=cache_read_tokens,
+                                )
+
                                 user_usage = UsageData(
                                     model=model,
                                     input_tokens=input_tokens,
-                                    input_tokens_cost=input_tokens_cost,
                                     output_tokens=output_tokens,
-                                    output_tokens_cost=output_tokens_cost,
+                                    cache_write_tokens=cache_write_tokens,
+                                    cache_read_tokens=cache_read_tokens,
+                                    cost=total_cost,
                                     timestamp=timestamp
                                     )
                                 self.usage_data.append(user_usage)
