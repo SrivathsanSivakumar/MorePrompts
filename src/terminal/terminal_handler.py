@@ -47,17 +47,18 @@ class TerminalHandler:
         """
         usage_data = self.log_reader.parse_json_files()
         session_data = SessionData(usage_data=usage_data)
-        usage_data = session_data.calculate_totals()
+
+        total_tokens = session_data.total_tokens()
         session_end = session_data.session_reset_time()
         session_messages = session_data.session_messages()
+        total_cost = session_data.total_cost()
+
         if usage_data:
-            input_tokens, input_cost = usage_data[0][0], usage_data[0][1]
-            output_tokens, output_cost = usage_data[1][0], usage_data[1][1]
-            total_tokens, total_cost = usage_data[2][0], usage_data[2][1]
             return (
-                f"Total: {total_tokens} tokens, ${total_cost:.6f} | " +
+                f"Tokens: {total_tokens} | " +
                 f"Session reset in: {session_end} | " +
-                f"Messages: {session_messages}"
+                f"Messages: {session_messages} | " +
+                f"Cost: {total_cost:.2f} $"
             )
         return ""
         
