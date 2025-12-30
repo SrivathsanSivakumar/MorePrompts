@@ -51,6 +51,25 @@ This will:
 2. Start Claude Code with the monitoring overlay
 3. Show real-time usage at the bottom of your terminal
 
+### Command Line Options
+
+```bash
+sumonitor [OPTIONS]
+```
+
+**Options:**
+
+- `--plan {pro,max5,max20}` - Your Claude subscription plan (default: `pro`)
+  - `pro`: Claude Pro plan limits
+  - `max5`: Max 5 plan limits
+  - `max20`: Max 20 plan limits
+
+- `--path PATH` - Custom path to Claude Code binary (default: auto-detect)
+
+- `--version` - Show version information
+
+- `-h, --help` - Show help message
+
 ## Contributing
 
 Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
