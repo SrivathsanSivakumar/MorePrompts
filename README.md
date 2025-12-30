@@ -86,4 +86,4 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
 
 ## Acknowledgments
-Big thanks to [Claude Code Usage Monitor](https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor) for their inspiration and awesome work!
+Big thanks to [Claude Code Usage Monitor](https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor) for the inspiration and awesome work!
