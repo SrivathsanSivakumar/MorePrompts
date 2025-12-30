@@ -13,9 +13,11 @@ A clear and concise description of what the bug is.
 **To Reproduce**
 Steps to reproduce the behavior:
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**Expected Behaviour**
+A clear and concise description of what you expected to happen.
 
 **Environment (please complete the following information):**
  - OS: Windows/MacOS/Linux
  - Terminal: Command Prompt/Terminal/
+
+**(Optional) Any additional context**
