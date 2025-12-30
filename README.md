@@ -1,9 +1,16 @@
 # simple-usage-monitor
-## CLI Tool - real-time token and cost estimator that lives in your terminal for Claude Code
+## In-terminal (HUD) usage monitoring for Claude Code - see your costs without leaving your workflow
 
-- Know your token and dollar cost in __real-time__ as your type your prompts, in the same terminal, so you know how many tokens and associated cost your input uses.
-- Tool seamlessly integrates with Claude Code with no additional setup needed! Just install and run `sumonitor` from anywhere to start. The tool will automatically start Claude Code for you along with the overlay.
-- Your sessions are fully private. All the processing happens locally on your device.
+Unlike other monitoring tools that require opening separate dashboards or browsers, **sumonitor displays your usage data right in your terminal in real-time** as you work. No context switching.
+
+![sumonitor usage](usage.gif)
+
+- Live token counts (input, output, cache)
+- Cost tracking with tiered pricing
+- Session limits based on your plan
+- Time until session reset
+
+All processing happens locally on your device - your sessions remain completely private.
 
 ### Supported Models
 1. Opus 4.5
@@ -12,10 +19,12 @@
 
 Other models will still have accurate token counting, just not dollar cost.
 
-## Setup
+## Installation
 
-### Installation
+### Install from PyPI (Recommended)
+`pip install sumonitor`
 
+### Install from source
 1. Clone the repo
 
     `git clone https://github.com/SrivathsanSivakumar/simple-usage-monitor`
@@ -26,11 +35,36 @@ Other models will still have accurate token counting, just not dollar cost.
  
     `pip install -e .`
 
-Then run the tool from anywhere by calling `sumonitor` on your terminal
-
 ### Uninstallation
-1. 
+`pip uninstall sumonitor`
 
-## Contributions
-Open for contributions! Take a look at issues to get started.
+## Usage
 
+Simply run:
+
+```bash
+sumonitor
+```
+
+This will:
+1. Auto-detect your Claude Code installation
+2. Start Claude Code with the monitoring overlay
+3. Show real-time usage at the bottom of your terminal
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+**Areas for contribution:**
+- Support for additional Claude models
+- Enhanced error handling
+- Additional export formats for usage data
+- UI improvements
+- Overlay functionality improvements
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
+
+## Acknowledgments
+Big thanks to [Claude Code Usage Monitor](https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor) for their inspiration and awesome work!

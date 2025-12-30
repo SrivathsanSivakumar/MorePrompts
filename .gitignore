@@ -216,3 +216,6 @@ tokens/node_modules
 
 tmp
 debug
+debug/
+htmlcov/
+*.egg-info
