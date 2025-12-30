@@ -69,7 +69,7 @@ issues = "https://github.com/SrivathsanSivakumar/simple-usage-monitor/issues"
 changelog = "https://github.com/SrivathsanSivakumar/simple-usage-monitor/blob/main/CHANGELOG.md"
 
 [project.scripts]
-sumonitor = "main:main"
+sumonitor = "sumonitor.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
