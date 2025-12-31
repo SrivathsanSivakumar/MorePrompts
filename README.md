@@ -44,6 +44,26 @@ Other models will still have accurate token counting, just not dollar cost.
 ### Uninstallation
 `pip uninstall sumonitor`
 
+### Troubleshooting
+
+**PATH not found:** If you see `WARNING: The script sumonitor is installed in '/home/username/.local/bin' which is not on PATH`, add to your shell config:
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+**externally-managed-environment error:** On modern Linux (Ubuntu 23.04+, Debian 12+, Fedora 38+), use one of these alternatives:
+
+- **pipx** (recommended):
+  ```bash
+  pipx install sumonitor
+  ```
+
+- **Virtual environment**:
+  ```bash
+  python3 -m venv myenv && source myenv/bin/activate
+  pip install sumonitor
+  ```
+
 ## Usage
 
 Simply run:
